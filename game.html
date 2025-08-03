@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quick Math Game</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen px-4">
+
+  <div class="text-center space-y-6 max-w-md w-full">
+    <h1 class="text-3xl font-bold text-yellow-400">🧮 Quick Math Game</h1>
+
+    <div id="start-screen">
+      <button onclick="startGame()" class="bg-green-500 px-6 py-2 rounded hover:bg-green-600 text-white">Start</button>
+    </div>
+
+    <div id="game" class="hidden space-y-4">
+      <div class="flex justify-between text-lg">
+        <span>⏱ Time: <span id="time">30</span>s</span>
+        <span>✅ Score: <span id="score">0</span></span>
+        <span>🏆 High: <span id="highscore">0</span></span>
+      </div>
+
+      <div class="bg-white text-black p-6 rounded shadow-lg">
+        <div id="question" class="text-2xl font-bold mb-4"></div>
+        <input id="answer" type="number" class="border px-4 py-2 w-full rounded text-center text-lg" placeholder="Your Answer" onkeydown="checkAnswer(event)">
+      </div>
+    </div>
+
+    <div id="game-over" class="hidden text-red-400 font-bold text-xl">
+      Time's Up! <br>
+      <button onclick="startGame()" class="mt-3 bg-blue-500 px-5 py-2 rounded hover:bg-blue-600 text-white">Try Again</button>
+    </div>
+  </div>
+
+  <script>
+    let score = 0;
+    let time = 30;
+    let timerInterval;
+    let correctAnswer = 0;
+
+    const questionEl = document.getElementById("question");
+    const answerEl = document.getElementById("answer");
+    const timeEl = document.getElementById("time");
+    const scoreEl = document.getElementById("score");
+    const highscoreEl = document.getElementById("highscore");
+    const game = document.getElementById("game");
+    const gameOver = document.getElementById("game-over");
+    const startScreen = document.getElementById("start-screen");
+
+    function startGame() {
+      score = 0;
+      time = 30;
+      scoreEl.textContent = score;
+      timeEl.textContent = time;
+      answerEl.value = "";
+      game.classList.remove("hidden");
+      gameOver.classList.add("hidden");
+      startScreen.classList.add("hidden");
+      generateQuestion();
+      answerEl.focus();
+
+      timerInterval = setInterval(() => {
+        time--;
+        timeEl.textContent = time;
+        if (time <= 0) endGame();
+      }, 1000);
+    }
+
+    function endGame() {
+      clearInterval(timerInterval);
+      game.classList.add("hidden");
+      gameOver.classList.remove("hidden");
+
+      const high = localStorage.getItem("mathHighscore") || 0;
+      if (score > high) {
+        localStorage.setItem("mathHighscore", score);
+      }
+      highscoreEl.textContent = localStorage.getItem("mathHighscore");
+    }
+
+    function generateQuestion() {
+      const num1 = Math.floor(Math.random() * 20);
+      const num2 = Math.floor(Math.random() * 20);
+      const operator = Math.random() < 0.5 ? "+" : "-";
+
+      correctAnswer = operator === "+" ? num1 + num2 : num1 - num2;
+      questionEl.textContent = `${num1} ${operator} ${num2} = ?`;
+    }
+
+    function checkAnswer(e) {
+      if (e.key === "Enter") {
+        const userAnswer = parseInt(answerEl.value);
+        if (userAnswer === correctAnswer) {
+          score++;
+          scoreEl.textContent = score;
+        }
+        answerEl.value = "";
+        generateQuestion();
+      }
+    }
+
+    highscoreEl.textContent = localStorage.getItem("mathHighscore") || 0;
+  </script>
+</body>
+</html>
